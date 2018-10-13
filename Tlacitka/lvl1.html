@@ -1,0 +1,198 @@
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="cs" lang="cs" dir="ltr"> 
+
+<head>
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" /> 
+  <link rel="stylesheet" href="tlacitka.css" type="text/css">
+  <title>Ntrophy</title>
+
+<style>
+.wrapper { width: 365px; height: 250px; border:0px solid #ccc; }
+.tlacitko { width: 100px; height: 100px; float: left; border: 5px solid #fff; margin: 5px; padding:0px; background-color: #ccc; }
+.pole { width:30px; height: 30px; }
+#tlacitko1 { width: 100px; height: 100px; float:left; border: 5px solid #fff; margin: 5px; margin-left:125px; margin-right:105px;}
+#body, #after_win { color: green; }
+#game{font-family: monospace; }
+</style> 
+ 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.8.2/jquery.min.js"></script> 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jqueryui/1.9.0/jquery-ui.min.js"></script>
+<script type="text/javascript" src="./jquery.min.js"></script> 
+<script type="text/javascript" src="./jquery-ui.min.js"></script>
+
+</head>
+
+
+<body>
+<center>
+<h1>Tlačítka</h1>
+<p>Najdi konec bludiště. Po cestě se nachází 10 drobečků jako nápověda.</p>
+</center>
+
+
+<script type="text/javascript">
+
+
+posX = 1;
+posY = 1;
+var body = 0;
+plan = new Array( new Array("#","#","#","#","#","#","#","#","#","#","#","#","#","#","#"), 
+                  new Array("#","-","#","-","d","-","#","-","-","#","-","-","#","#","#"),
+                  new Array("#","-","-","-","#","-","#","#","-","#","#","-","#","#","#"),
+                  new Array("#","#","#","#","#","-","#","-","d","-","#","-","d","-","#"),
+                  new Array("#","-","-","-","-","-","d","-","#","-","#","-","#","-","#"),
+                  new Array("#","-","#","#","#","-","#","-","#","d","#","d","#","d","#"), 
+                  new Array("#","-","#","-","-","-","#","-","#","-","-","-","#","-","#"),
+                  new Array("#","-","#","#","#","#","#","#","#","#","#","#","#","-","#"),
+                  new Array("#","-","-","-","-","-","-","-","#","d","-","d","-","d","#"),
+                  new Array("#","#","#","#","#","#","#","#","#","#","#","#","#","#","#")
+                  );
+
+function after_win(){
+  $('#after_win').slideToggle("fast");
+}
+
+function printPlan(){
+  
+  var s = "";
+  var s2 = "<table>";
+  for (i=0;i<plan.length; i++) {    
+    s2 = s2 + "<tr>"
+    for (j=0;j<plan[0].length; j++) {
+      if (posY == i && posX == j){
+        s=s+'☺';
+        s2 = s2 + "<td class=pole style='background-color:red;'></td>"
+      }else{      
+        s=s+plan[i][j];
+        if (plan[i][j]=='#'){ s2 = s2 + "<td class=pole style='background-color:black;'></td>" } 
+        if (plan[i][j]=='-'){ s2 = s2 + "<td class=pole style='background-color:white;'></td>" }
+        if (plan[i][j]=='d'){ s2 = s2 + "<td class=pole style='background-color:green;'></td>" }
+      }  
+    }
+    s=s+'<br />';
+    var s2 = s2 + "</tr>";
+  }  
+  var s2 = s2 + "</table>";
+
+  //$('#game').html(s); 
+  $('#game').html(s2);
+  $('#position').html(posY + ' '+ posX);
+
+};
+
+$(document).ready(function() {        
+        
+  printPlan();
+  var audioElement = document.createElement('audio');                
+  audioElement.setAttribute('src', "sounds/"+"krok"+".ogg");
+  audioElement.load();    
+  var audioElement2 = document.createElement('audio');                
+  audioElement2.setAttribute('src', "sounds/"+"stop3"+".ogg");
+  audioElement2.load();    
+  var audioElement3 = document.createElement('audio');                
+  audioElement3.setAttribute('src', "sounds/"+"score"+".ogg");
+  audioElement3.load();    
+  var audioElement4 = document.createElement('audio');                
+  audioElement4.setAttribute('src', "sounds/"+"fanfara"+".mp3");
+  audioElement4.load();    
+        
+  function playKrok(){ audioElement.play(); }                                  
+  function playStop(){ audioElement2.play(); }
+  function playScore(){ audioElement3.play(); }
+  function playFanfara(){ audioElement4.play(); }
+        
+  function updatePlan(){
+    if (plan[posY][posX]=='d'){
+      plan[posY][posX]='-';
+      body += 1;
+      $('#body').html("Počet nalezených drobečků: "+body);
+      if (body == 10){
+        playFanfara();
+        $('#after_win').slideToggle("fast");
+      }else{
+        playScore();        
+      }      
+    }else{
+      playKrok();
+    }
+    
+  }
+  
+  //$('.tlacitko').click(function(){
+    //$(this).css({"background-color":"#ffa500"});    
+    //$(this).delay(100).animate({"background-color":"#ccc"},"fast");
+    //$(this).delay(1000).css({"background-color":"#ffc"});
+    
+  //});
+  $('.tlacitko').mouseover(function(){
+    $(this).css("border-color","grey");
+    //$(this).css("border","2px solid grey");
+  });
+  $('.tlacitko').mouseout(function(){
+    $(this).css("border-color","white");
+  });
+  
+        $('#restart').click(function() {
+          play("restart");
+          printPlan();
+        });
+        
+        $('#tlacitko1').click(function() {
+          if (plan[posY-1][posX]=='-' || plan[posY-1][posX]=='d'){
+            posY-=1;
+            updatePlan();
+            printPlan();
+          }else{            
+            playStop();
+          }
+        });        
+        $('#tlacitko2').click(function() {
+          if (plan[posY][posX-1]=='-' || plan[posY][posX-1]=='d'){
+            posX-=1;
+            updatePlan();
+            printPlan();
+          }else{
+            playStop();
+          }
+        });        
+        $('#tlacitko3').click(function() {
+          if (plan[posY+1][posX]=='-' || plan[posY+1][posX]=='d'){             
+            posY+=1;
+            updatePlan();
+            printPlan();            
+          }else{            
+            playStop();
+          }
+          printPlan();          
+        });        
+        $('#tlacitko4').click(function() {
+          if (plan[posY][posX+1]=='-' || plan[posY][posX+1]=='d'){
+            posX+=1;
+            updatePlan();
+            printPlan();
+          }else{
+            playStop();
+          } 
+        });        
+
+}); 
+ 
+</script>                     
+
+<center>
+<!--<span class="play" soubor="sounds/n.mp3">Play</span>-->
+
+<a href="index.html"><button id = "restart">Restart</button></a>
+<h1 id="body" >Počet nalezených drobečků 0</h1>
+<h1 id="after_win" style="display:none;">Skvělé! Ohlaš výsledek organizátorům.<br /></h1>
+<div class="wrapper">
+<div id = "tlacitko1" class="tlacitko"></div>
+<div id = "tlacitko2" class="tlacitko"></div>
+<div id = "tlacitko3" class="tlacitko"></div>
+<div id = "tlacitko4" class="tlacitko"></div>
+</div>
+<div id="ahlaska"></div>
+<div id="aposition"></div>
+<div id="agame"></div>
+</center>
+</body>
+</html>
